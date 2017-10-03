@@ -1,10 +1,15 @@
 package com.mk.edu;
 
 import java.io.IOException;
+import java.util.UUID;
+import java.util.Vector;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.gson.Gson;
 
 /**
  * Servlet implementation class DataAccessServlet
@@ -24,16 +29,18 @@ public class DataAccessServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.getWriter().append("Served at: ").append(request.getContextPath());
-	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
+		Vector<Transaction> _V = new Vector<Transaction>();
+		
+		for (int _i = 0; _i < 200; _i++) {
+			Transaction _T = new Transaction();
+			_T.setID(100000000 + _i);
+			_T.setTransactionCode(UUID.randomUUID().toString());
+			_V.add(_T);
+		}
+		
+		response.setContentType("application/json");
+		response.getWriter().println(new Gson().toJson(_V));
+		
 	}
 
 }
