@@ -57,6 +57,8 @@ public class TransactionDAO {
                 t.setTransactionCode(rs.getString(2));
                 list.add(t);
             }
+            
+            this._MYLOGGER.info("Successfully fetched " + list.size() + " entities");
             return list;
         } 
         finally {

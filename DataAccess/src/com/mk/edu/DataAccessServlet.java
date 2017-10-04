@@ -77,18 +77,18 @@ public class DataAccessServlet extends HttpServlet {
 			_V = _TransactionDAO.getTransactions(null);
 		} 
 		catch (SQLException e) {
+			this._MYLOGGER.error(e.getMessage());
 			throw new ServletException(e);
 		}
 		
 		if (_V != null && _V.size() > 0) {
-			this._MYLOGGER.info("Successfully fetched " + _V.size() + " entities of type " + Transaction.class.getSimpleName());
 			response.setContentType(this._JSON_MIMEType);
 			response.getWriter().println(new Gson().toJson(_V));
 			return;
 		}
 		
 		this._MYLOGGER.info("No entities fetched");
-		response.getWriter().println(this.getClass().getSimpleName() + ": " + "No entities fetched");
+		response.getWriter().println("No entities fetched");
 	}
 	
 	private String getCreateTransactionsDB_Script() throws IOException {
@@ -102,7 +102,7 @@ public class DataAccessServlet extends HttpServlet {
         	_SB.append(_Line);
         _Reader.close();
         
-        this._MYLOGGER.info("Successfully read file " + _ScriptFile);
+        this._MYLOGGER.info("Successfully read contents of file " + _ScriptFile);
         return _SB.toString();
 	}
 	
