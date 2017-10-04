@@ -6,9 +6,14 @@
   <servlet>
     <servlet-name>DataAccessServlet</servlet-name>
     <servlet-class>com.mk.edu.DataAccessServlet</servlet-class>
+     <init-param>
+         <param-name>DatabaseName</param-name>
+         <param-value>testdb</param-value>
+     </init-param>
   </servlet>
   <servlet-mapping>
     <servlet-name>DataAccessServlet</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
+  
 </web-app>

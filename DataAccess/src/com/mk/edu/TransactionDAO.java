@@ -2,9 +2,10 @@ package com.mk.edu;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.sql.DataSource;
 
@@ -33,8 +34,25 @@ public class TransactionDAO {
         }
 	}
 
-	public Vector<Transaction> getTransactions() {
-		return null;
+	public ArrayList<Transaction> getTransactions(String where) throws SQLException {
+		Connection _Connection = this._DataSource.getConnection();
+        try {
+            PreparedStatement pstmt = _Connection.prepareStatement("SELECT * FROM " + this._TableName + (where == null ? "" : " " + where));
+            ResultSet rs = pstmt.executeQuery();
+            ArrayList<Transaction> list = new ArrayList<Transaction>();
+            while (rs.next()) {
+            	Transaction t = new Transaction();
+                t.setID(rs.getLong(0));
+                t.setTransactionValue(rs.getDouble(1));
+                t.setTransactionCode(rs.getString(2));
+                list.add(t);
+            }
+            return list;
+        } 
+        finally {
+            if (_Connection != null) 
+            	_Connection.close();
+        }
 	}
 	
 	private void _createTable(Connection connection) throws SQLException {

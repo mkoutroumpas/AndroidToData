@@ -7,12 +7,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
-import java.util.Vector;
+import java.util.ArrayList;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import com.google.gson.Gson;
 
@@ -20,9 +23,11 @@ import com.google.gson.Gson;
  * Servlet implementation class DataAccessServlet
  */
 public class DataAccessServlet extends HttpServlet {
-	private final String _DatabaseName = "testdb";
 	private final String _JSON_MIMEType = "application/json";
-	private final String _HTML_MIMEType = "text/html";
+	
+	private String _DatabaseName = "";
+	private TransactionDAO _TransactionDAO;
+	
 	private static final long serialVersionUID = 1L;
        
     /**
@@ -32,26 +37,47 @@ public class DataAccessServlet extends HttpServlet {
         super();
     }
 
+	@Override
+	public void init() throws ServletException {
+		this._DatabaseName = this.getInitParameter("DatabaseName");
+		
+		try {
+            InitialContext ctx = new InitialContext();
+            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/" + this._DatabaseName);
+            this._TransactionDAO = new TransactionDAO(ds, this.getCreateTransactionsDB_Script());
+		} 
+		catch (IOException ioex) {
+			throw new ServletException(ioex);
+        } 
+		catch (SQLException e) {
+            throw new ServletException(e);
+        } 
+		catch (NamingException e) {
+            throw new ServletException(e);
+        }
+	}
+	
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		Vector<Transaction> _V = null;
+		ArrayList<Transaction> _V = null;
 				
 		try {
-			TransactionDAO _TransactionDAO = new TransactionDAO(null, this.getCreateTransactionsDB_Script());
-			_V = _TransactionDAO.getTransactions();
+			_V = _TransactionDAO.getTransactions(null);
 		} 
-		catch (SQLException ex) {
-			response.setContentType(this._HTML_MIMEType);
-			response.getWriter().println(this.formatError(ex));
+		catch (SQLException e) {
+			throw new ServletException(e);
+		}
+		
+		if (_V != null && _V.size() > 0) {
+			response.setContentType(this._JSON_MIMEType);
+			response.getWriter().println(new Gson().toJson(_V));
 			return;
 		}
 		
-		response.setContentType(this._JSON_MIMEType);
-		response.getWriter().println(new Gson().toJson(_V));
-		
+		response.getWriter().println(this.getClass().getSimpleName() + ": " + "No data");
 	}
 	
 	private String getCreateTransactionsDB_Script() throws IOException {
