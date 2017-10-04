@@ -27,7 +27,7 @@ import com.google.gson.Gson;
  */
 public class DataAccessServlet extends HttpServlet {
 	private final String _JSON_MIMEType = "application/json";
-	private final Logger _MYLOGGER = LoggerFactory.getLogger(this.getClass());
+	private final Logger _Logger = LoggerFactory.getLogger(this.getClass());
 	
 	private String _DatabaseName = "";
 	private TransactionDAO _TransactionDAO;
@@ -44,24 +44,24 @@ public class DataAccessServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		this._DatabaseName = this.getInitParameter("DatabaseName");
-		this._MYLOGGER.info("Database to connect to: " + this._DatabaseName);
+		this._Logger.info("Database to connect to: " + this._DatabaseName);
 		
 		try {
             InitialContext ctx = new InitialContext();
             DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/" + this._DatabaseName);
             this._TransactionDAO = new TransactionDAO(ds, this.getCreateTransactionsDB_Script());
-            this._MYLOGGER.info("Database initialization successful");
+            this._Logger.info("Database initialization successful");
 		} 
 		catch (IOException ioex) {
-			this._MYLOGGER.error(ioex.getMessage());
+			this._Logger.error(ioex.getMessage());
 			throw new ServletException(ioex);
         } 
 		catch (SQLException e) {
-			this._MYLOGGER.error(e.getMessage());
+			this._Logger.error(e.getMessage());
             throw new ServletException(e);
         } 
 		catch (NamingException e) {
-			this._MYLOGGER.error(e.getMessage());
+			this._Logger.error(e.getMessage());
             throw new ServletException(e);
         }
 	}
@@ -77,7 +77,7 @@ public class DataAccessServlet extends HttpServlet {
 			_V = _TransactionDAO.getTransactions(null);
 		} 
 		catch (SQLException e) {
-			this._MYLOGGER.error(e.getMessage());
+			this._Logger.error(e.getMessage());
 			throw new ServletException(e);
 		}
 		
@@ -87,14 +87,14 @@ public class DataAccessServlet extends HttpServlet {
 			return;
 		}
 		
-		this._MYLOGGER.info("No entities fetched");
+		this._Logger.info("No entities fetched");
 		response.getWriter().println("No entities fetched");
 	}
 	
 	private String getCreateTransactionsDB_Script() throws IOException {
 		String _ScriptFile = "/documents/_Create_TransactionsDB.sql";
 		InputStream _Create_TransactionsDB = this.getServletContext().getResourceAsStream(_ScriptFile);
-		this._MYLOGGER.info("Successfully loaded file " + _ScriptFile);
+		this._Logger.info("Successfully loaded file " + _ScriptFile);
 		BufferedReader _Reader = new BufferedReader(new InputStreamReader(_Create_TransactionsDB));
         StringBuilder _SB = new StringBuilder();
         String _Line;
@@ -102,7 +102,7 @@ public class DataAccessServlet extends HttpServlet {
         	_SB.append(_Line);
         _Reader.close();
         
-        this._MYLOGGER.info("Successfully read contents of file " + _ScriptFile);
+        this._Logger.info("Successfully read contents of file " + _ScriptFile);
         return _SB.toString();
 	}
 	

@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TransactionDAO {
-	private final Logger _MYLOGGER = LoggerFactory.getLogger(this.getClass());
+	private final Logger _Logger = LoggerFactory.getLogger(this.getClass());
 	
 	private final DataSource _DataSource;
 	private final String _TableName = Transaction.class.getSimpleName();
@@ -37,7 +37,7 @@ public class TransactionDAO {
         finally {
             if (_Connection != null) {
             	_Connection.close();
-            	this._MYLOGGER.info("Connection to database closed");
+            	this._Logger.info("Connection to database closed");
             }
         }
 	}
@@ -58,7 +58,7 @@ public class TransactionDAO {
                 list.add(t);
             }
             
-            this._MYLOGGER.info("Successfully fetched " + list.size() + " entities");
+            this._Logger.info("Successfully fetched " + list.size() + " entities");
             return list;
         } 
         finally {
@@ -70,7 +70,7 @@ public class TransactionDAO {
 	private void _createTable(Connection connection) throws SQLException {
 		if (connection != null && this._SQLCreateStatement != null) {
 			connection.prepareStatement(this._SQLCreateStatement).executeUpdate();
-			this._MYLOGGER.info("Table " + this._TableName + " created successfully");
+			this._Logger.info("Table " + this._TableName + " created successfully");
 		}
 	}
 
@@ -81,12 +81,12 @@ public class TransactionDAO {
         while (rs.next()) {
             String _Name = rs.getString("TABLE_NAME");
             if (_Name.equals(this._TableName)) {
-            	this._MYLOGGER.info("Table " + this._TableName + " found to exist");
+            	this._Logger.info("Table " + this._TableName + " found to exist");
                 return true;
             }
         }
         
-        this._MYLOGGER.info("Table " + this._TableName + " not found to exist");
+        this._Logger.info("Table " + this._TableName + " not found to exist");
         return false;
 	}
 }
