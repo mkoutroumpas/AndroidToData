@@ -3,17 +3,24 @@
     xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     id="WebApp_ID" version="2.5">
 
-  <servlet>
-    <servlet-name>DataAccessServlet</servlet-name>
-    <servlet-class>com.mk.edu.DataAccessServlet</servlet-class>
-     <init-param>
-         <param-name>DatabaseName</param-name>
-         <param-value>testdb</param-value>
-     </init-param>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>DataAccessServlet</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>
-  
+	<servlet>
+  		<servlet-name>DataAccessServlet</servlet-name>
+    	<servlet-class>com.mk.edu.DataAccessServlet</servlet-class>
+    	<init-param>
+    		<param-name>DatabaseName</param-name>
+    		<param-value>testdb</param-value>
+  		</init-param>
+  		<init-param>
+    		<param-name>SchemaName</param-name>
+    		<param-value>TEST</param-value>
+  		</init-param>
+  	</servlet>
+  	<servlet-mapping>
+    	<servlet-name>DataAccessServlet</servlet-name>
+    	<url-pattern>/</url-pattern>
+  	</servlet-mapping>
+  	<resource-ref>
+  		<res-ref-name>jdbc/testdb</res-ref-name>
+    	<res-type>javax.sql.DataSource</res-type>
+  	</resource-ref>
 </web-app>

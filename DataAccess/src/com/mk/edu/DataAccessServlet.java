@@ -30,6 +30,8 @@ public class DataAccessServlet extends HttpServlet {
 	private final Logger _Logger = LoggerFactory.getLogger(this.getClass());
 	
 	private String _DatabaseName = "";
+	private String _SchemaName = "";
+	
 	private TransactionDAO _TransactionDAO;
 	
 	private static final long serialVersionUID = 1L;
@@ -43,7 +45,9 @@ public class DataAccessServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
+		this._SchemaName = this.getInitParameter("SchemaName");
 		this._DatabaseName = this.getInitParameter("DatabaseName");
+		
 		this._Logger.info("Database to connect to: " + this._DatabaseName);
 		
 		try {
