@@ -1,7 +1,7 @@
 package com.mk.edu;
 
 public class Transaction {
-	public long _ID;
+	private long _ID;
 	public long getID() {
 		return _ID;
 	}
@@ -9,7 +9,15 @@ public class Transaction {
 		this._ID = _ID;
 	}
 
-	public String TransactionCode;
+	private double TransactionValue;
+	public double getTransactionValue() {
+		return TransactionValue;
+	}
+	public void setTransactionValue(double transactionValue) {
+		TransactionValue = transactionValue;
+	}
+
+	private String TransactionCode;
 	public String getTransactionCode() {
 		return TransactionCode;
 	}
