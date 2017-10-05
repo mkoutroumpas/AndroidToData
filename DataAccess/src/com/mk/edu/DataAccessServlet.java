@@ -54,7 +54,7 @@ public class DataAccessServlet extends HttpServlet {
 		
 		this._Logger.info("Database to connect to: " + this._DatabaseName);
 		
-		this._doInitTests();
+		this._TestCRUD_Init();
 		
 		/*try {
             InitialContext ctx = new InitialContext();
@@ -78,88 +78,12 @@ public class DataAccessServlet extends HttpServlet {
             throw new ServletException(e);
         }*/
 	}
-	
-	private void _doInitTests() throws ServletException {
-		Connection connection = null;
-		try {
-			InitialContext ctx = new InitialContext();
-			this._DataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/" + this._DatabaseName);
-			connection = this._DataSource.getConnection();
-			try {
-				connection.prepareStatement("DROP TABLE Transaction").execute();
-				this._Logger.info("Table Transaction deleted successfully");
-			} catch (Exception e) { this._Logger.error("Error deleting Transaction table: " + e.getMessage()); }
-			try {
-				connection.prepareStatement("CREATE COLUMN TABLE Transaction " +
-					"(ID INTEGER, " +
-					"TransactionValue DECIMAL, " +
-					"TransactionCode VARCHAR(255), " +
-					"PRIMARY KEY (ID))").execute();
-				this._Logger.info("Table Transaction created successfully");
-			} catch (Exception e) { this._Logger.error("Error creating Transaction table: " + e.getMessage()); }
-			try {
-				connection.prepareStatement("INSERT INTO Transaction VALUES (1, 0.45, SYSUUID)").execute();
-				this._Logger.info("Row inserted successfully into table Transaction");
-			} catch (Exception e) { this._Logger.error("Error inserting row in Transaction table: " + e.getMessage()); }
-			
-		}
-		catch (Exception e) {
-			this._Logger.error(e.getMessage());
-            throw new ServletException(e);
-        }
-		finally {
-			if (connection != null){
-				try {
-					connection.close();
-				} 
-				catch (SQLException sqex) { throw new ServletException(sqex); }
-			}
-		}
-	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		ArrayList<Transaction> list = new ArrayList<Transaction>();
-		Connection connection = null;
-		try {
-			connection = this._DataSource.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Transaction");
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-            	Transaction t = new Transaction();
-                t.setID(rs.getLong(1));
-                t.setTransactionValue(rs.getDouble(2));
-                t.setTransactionCode(rs.getString(3));
-                list.add(t);
-            }
-            
-            this._Logger.info("Successfully fetched " + list.size() + " entities");
-        } 
-		catch (Exception ex) {
-			this._Logger.error(ex.getMessage());
-			throw new ServletException(ex);
-		}
-        finally {
-            if (connection != null) {
-				try {
-					connection.close();
-				} catch (SQLException e) {
-					this._Logger.error(e.getMessage());
-					throw new ServletException(e);
-				}
-            }
-        }
-		
-		if (list.size() > 0) {
-			response.setContentType(this._JSON_MIMEType);
-			response.getWriter().println(new Gson().toJson(list));
-			return;
-		}
-		
-		this._Logger.info("No entities fetched");
-		response.getWriter().println("No entities fetched");
+		this._TestCRUD(response);
 		
 		/*ArrayList<Transaction> _V = null;
 				
@@ -247,4 +171,84 @@ public class DataAccessServlet extends HttpServlet {
 		return sw.toString().replace(System.getProperty("line.separator"), "<br/>\n");
 	}
 
+	private void _TestCRUD(HttpServletResponse response) throws ServletException, IOException {
+		ArrayList<Transaction> list = new ArrayList<Transaction>();
+		Connection connection = null;
+		try {
+			connection = this._DataSource.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Transaction");
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+            	Transaction t = new Transaction();
+                t.setID(rs.getLong(1));
+                t.setTransactionValue(rs.getDouble(2));
+                t.setTransactionCode(rs.getString(3));
+                list.add(t);
+            }
+            
+            this._Logger.info("Successfully fetched " + list.size() + " entities");
+        } 
+		catch (Exception ex) {
+			this._Logger.error(ex.getMessage());
+			throw new ServletException(ex);
+		}
+        finally {
+            if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					this._Logger.error(e.getMessage());
+					throw new ServletException(e);
+				}
+            }
+        }
+		
+		if (list.size() > 0) {
+			response.setContentType(this._JSON_MIMEType);
+			response.getWriter().println(new Gson().toJson(list));
+			return;
+		}
+		
+		this._Logger.info("No entities fetched");
+		response.getWriter().println("No entities fetched");
+	}
+	
+	private void _TestCRUD_Init() throws ServletException {
+		Connection connection = null;
+		try {
+			InitialContext ctx = new InitialContext();
+			this._DataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/" + this._DatabaseName);
+			connection = this._DataSource.getConnection();
+			try {
+				connection.prepareStatement("DROP TABLE Transaction").execute();
+				this._Logger.info("Table Transaction deleted successfully");
+			} catch (Exception e) { this._Logger.error("Error deleting Transaction table: " + e.getMessage()); }
+			try {
+				connection.prepareStatement("CREATE COLUMN TABLE Transaction " +
+					"(ID INTEGER, " +
+					"TransactionValue DECIMAL, " +
+					"TransactionCode VARCHAR(255), " +
+					"PRIMARY KEY (ID))").execute();
+				this._Logger.info("Table Transaction created successfully");
+			} catch (Exception e) { this._Logger.error("Error creating Transaction table: " + e.getMessage()); }
+			try {
+				connection.prepareStatement("INSERT INTO Transaction VALUES (1, 0.45, SYSUUID)").execute();
+				this._Logger.info("Row inserted successfully into table Transaction");
+			} catch (Exception e) { this._Logger.error("Error inserting row in Transaction table: " + e.getMessage()); }
+			
+		}
+		catch (Exception e) {
+			this._Logger.error(e.getMessage());
+            throw new ServletException(e);
+        }
+		finally {
+			if (connection != null){
+				try {
+					connection.close();
+				} 
+				catch (SQLException sqex) { throw new ServletException(sqex); }
+			}
+		}
+	}
+	
 }
