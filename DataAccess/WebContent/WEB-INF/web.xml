@@ -12,7 +12,11 @@
   		</init-param>
   		<init-param>
     		<param-name>SchemaName</param-name>
-    		<param-value>TEST</param-value>
+    		<param-value></param-value>
+  		</init-param>
+  		<init-param>
+    		<param-name>DatabaseScriptFileName</param-name>
+    		<param-value>/WEB-INF/scripts/_Create_TransactionsDB.sql</param-value>
   		</init-param>
   	</servlet>
   	<servlet-mapping>

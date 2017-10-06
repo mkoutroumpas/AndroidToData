@@ -1,11 +1,7 @@
 package com.mk.edu;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -35,8 +30,8 @@ public class DataAccessServlet extends HttpServlet {
 	
 	private String _DatabaseName = "";
 	private String _SchemaName = "";
+	private String _DatabaseScriptFileName = "";
 	private DataSource _DataSource = null;
-	private TransactionDAO _TransactionDAO;
 	
 	private static final long serialVersionUID = 1L;
        
@@ -51,48 +46,56 @@ public class DataAccessServlet extends HttpServlet {
 	public void init() throws ServletException {
 		this._SchemaName = this.getInitParameter("SchemaName");
 		this._DatabaseName = this.getInitParameter("DatabaseName");
+		this._DatabaseScriptFileName = this.getInitParameter("DatabaseScriptFileName");
 		
 		this._Logger.info("Database to connect to: " + this._DatabaseName);
+		this._Logger.info("Selected Database schema: " + this._SchemaName);
+		this._Logger.info("Database script file: " + this._DatabaseScriptFileName);
 		
-		this._TestFileAccess_Init();
+		String script = null;
+		try {
+			script = this.loadDatabaseScript(this._DatabaseScriptFileName);
+			this._Logger.info("Successfully loaded script file: " + this._DatabaseScriptFileName);
+		} catch (Exception e) { this._Logger.error(e.getMessage()); }
 		
-		//this._TestCRUD_Init();
+		ArrayList<String> statements = null;
+		try {
+			if (script != null && !script.trim().equals("")) {
+				statements = this.getScriptStatements(script, ";");
+				this._Logger.info("Successfully loaded script file statements.");
+			}
+			else
+				this._Logger.info("Script file statements not loaded.");
+		} catch (Exception e) { this._Logger.error(e.getMessage()); }
 		
-		/*try {
-            InitialContext ctx = new InitialContext();
-            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/" + this._DatabaseName);
-            if (ds != null)
-            	this._Logger.info("Database lookup successful");
-            this._TransactionDAO = new TransactionDAO(ds, this.getCreateTransactionsDB_Script_Hardcoded(this._SchemaName), this._SchemaName);
-            if (this._TransactionDAO != null)
-            	this._Logger.info("Datasource initialization successful");
-		} 
-		catch (IOException ioex) {
-			this._Logger.error(ioex.getMessage());
-			throw new ServletException(ioex);
-        } 
-		catch (SQLException e) {
-			this._Logger.error(e.getMessage());
-            throw new ServletException(e);
-        } 
-		catch (NamingException e) {
-			this._Logger.error(e.getMessage());
-            throw new ServletException(e);
-        }*/
+		if (statements != null && statements.size() > 0) {
+			this.executeStatements(statements);
+			this._Logger.info(statements.size() + " statements executed successfully.");
+		}
+		else
+			this._Logger.info("No SQL statements found to execute.");
 	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		//this._TestCRUD(response);
+		this.showTransactions(response);
+	}
+
+	/***
+	 * Display all Transactions entered.
+	 * @param response HttpServletResponse object to write to.
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void showTransactions(HttpServletResponse response) throws ServletException, IOException {
+		ArrayList<Transaction> _V = null;
 		
-		/*ArrayList<Transaction> _V = null;
-				
 		try {
-			_V = _TransactionDAO.getTransactions(null);
+			_V = new TransactionDAO(this._DataSource).getTransactions(null);
 		}
-		catch (SQLException e) {
+		catch (Exception e) {
 			this._Logger.error(e.getMessage());
 			throw new ServletException(e);
 		}
@@ -104,75 +107,98 @@ public class DataAccessServlet extends HttpServlet {
 		}
 		
 		this._Logger.info("No entities fetched");
-		response.getWriter().println("No entities fetched");*/
-	}
-	
-	private String getCreateTransactionsDB_Script() throws IOException {
-		String _ScriptFile = "/WEB-INF/scripts/_Create_TransactionsDB.sql";
-		InputStream _Create_TransactionsDB = this.getServletContext().getResourceAsStream(_ScriptFile);
-		
-		//Thread.currentThread().getContextClassLoader().getResourceAsStream(name)
-		
-		this._Logger.info("this.getServletContext() is null: " + (this.getServletContext() == null));
-		this._Logger.info("_Create_TransactionsDB is null: " + (_Create_TransactionsDB == null));
-		
-		if (_Create_TransactionsDB != null) {
-			this._Logger.info("Successfully loaded file " + _ScriptFile);
-			
-			Scanner _Scanner = new Scanner(_Create_TransactionsDB).useDelimiter("\\A");
-			String _ret = _Scanner.hasNext() ? _Scanner.next() : "";
-	        _Scanner.close();
-	        
-	        this._Logger.info("Successfully read contents of file " + _ScriptFile);
-	        return _ret;
-		}
-		
-		this._Logger.error("Error loading file " + _ScriptFile);
-		return null;
-	}
-	
-	private String getCreateTransactionsDB_Script_Hardcoded(String schemaname) throws IOException {
-		if (schemaname == null) schemaname = "";
-		return "DROP TABLE " + schemaname + ".Transaction;" +
-			"CREATE COLUMN TABLE " + schemaname + ".Transaction (" +
-				"ID INTEGER," +
-				"TransactionValue DECIMAL," +
-				"TransactionCode VARCHAR(255)," +
-				"PRIMARY KEY (ID));" +
-				" " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (1, 0.45, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (2, 23.3342, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (3, 1.23, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (4, 0, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (5, 15.01, SYSUUID); " + 
-				"INSERT INTO " + schemaname + ".Transaction VALUES (6, 7, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (7, 2.223, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (8, 83.234, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (9, 9.0023, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (10, 1.001, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (11, 1.004, SYSUUID); " + 
-				"INSERT INTO " + schemaname + ".Transaction VALUES (12, 0, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (13, 0, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (14, 63.03, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (15, 14.933, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (16, 0.3409, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (17, -23.34, SYSUUID);" +  
-				"INSERT INTO " + schemaname + ".Transaction VALUES (18, 0, SYSUUID);  " +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (19, -4.009, SYSUUID);" +
-				"INSERT INTO " + schemaname + ".Transaction VALUES (20, 1.0231, SYSUUID);";
+		response.getWriter().println("No entities fetched");
 	}
 	
 	/**
-	 * See: https://www.avajava.com/tutorials/lessons/how-do-i-display-a-stack-trace-on-a-web-page.html
-	 * @param t
-	 * @return
+	 * Parse script file to individual SQL script statements.
+	 * @param scriptcontent Whole content of script file
+	 * @param delimiter Statement delimiter
+	 * @return List of SQL statements
 	 */
-	public String formatError(Throwable t) { 
-		StringWriter sw = new StringWriter();
-		t.printStackTrace(new PrintWriter(sw));
-		return sw.toString().replace(System.getProperty("line.separator"), "<br/>\n");
+	private ArrayList<String> getScriptStatements(String scriptcontent, String delimiter) {
+		if (delimiter == null || delimiter.trim().equals("")) 
+			delimiter = ";";
+		
+		ArrayList<String> _ret = new ArrayList<String>();
+		if (scriptcontent != null && !scriptcontent.trim().equals("")) {
+			for (String sa : scriptcontent.split(delimiter)) 
+				if (!sa.trim().equals(""))
+					_ret.add(sa);
+		}
+		
+		return _ret;
 	}
-
+	
+	/**
+	 * Load SQL script file
+	 * @param scriptfilename Name of script file
+	 * @return Script file contents
+	 * @throws IOException
+	 */
+	@SuppressWarnings("resource")
+	private String loadDatabaseScript(String scriptfilename) throws IOException {
+		if (scriptfilename != null && !scriptfilename.trim().equals("")) {
+			InputStream _CreateDBStream = this.getServletContext().getResourceAsStream(scriptfilename);
+			
+			if (_CreateDBStream != null) {
+				this._Logger.info("Successfully loaded file " + scriptfilename);
+				
+				Scanner _Scanner = new Scanner(_CreateDBStream).useDelimiter("\\A");
+				String _ret = _Scanner.hasNext() ? _Scanner.next() : "";
+		        _Scanner.close();
+		        
+		        this._Logger.info("Successfully read contents of file " + scriptfilename);
+		        return _ret;
+			}
+		}
+		this._Logger.error("Error loading file " + scriptfilename);
+		return null;
+	}
+	
+	/**
+	 * Execute a bunch of SQL statements 
+	 * @param statements List of SQL statements to execute
+	 * @throws ServletException
+	 */
+	private void executeStatements(ArrayList<String> statements) throws ServletException {
+		Connection connection = null;
+		
+		if (statements != null && statements.size() > 0) {
+			try {
+				InitialContext ctx = new InitialContext();
+				this._DataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/" + this._DatabaseName);
+				connection = this._DataSource.getConnection();
+				
+				for (String st : statements) {
+					try {
+						connection.prepareStatement(st).execute();
+						this._Logger.info("Successfully executed statement: " + st);
+					} catch (Exception e) { this._Logger.error("Error executing statement: " + st + ". Error description: " + e.getMessage()); }
+				}
+			}
+			catch (Exception e) {
+				this._Logger.error(e.getMessage());
+				throw new ServletException(e);
+			}
+			finally {
+				if (connection != null){
+					try {
+						connection.close();
+					} 
+					catch (SQLException sqex) { throw new ServletException(sqex); }
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Test method
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unused")
 	private void _TestCRUD(HttpServletResponse response) throws ServletException, IOException {
 		ArrayList<Transaction> list = new ArrayList<Transaction>();
 		Connection connection = null;
@@ -215,6 +241,11 @@ public class DataAccessServlet extends HttpServlet {
 		response.getWriter().println("No entities fetched");
 	}
 	
+	/**
+	 * Test method
+	 * @throws ServletException
+	 */
+	@SuppressWarnings("unused")
 	private void _TestCRUD_Init() throws ServletException {
 		Connection connection = null;
 		try {
@@ -253,9 +284,13 @@ public class DataAccessServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Test method
+	 */
+	@SuppressWarnings("unused")
 	private void _TestFileAccess_Init() {
 		try {
-			String _S = this.getCreateTransactionsDB_Script();
+			String _S = this.loadDatabaseScript(this._DatabaseScriptFileName);
 			this._Logger.info("Successfully read contents: " + _S);
 		} 
 		catch (IOException e) {
