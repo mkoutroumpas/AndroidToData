@@ -11,22 +11,23 @@ https://help.sap.com/viewer/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/7613843
 https://help.sap.com/viewer/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/937ce0d172bb101490cf767db0e91070.html 
 https://archive.sap.com/discussions/thread/3951591 
 
-Use Java Web runtime library, Dynamic Web Module v.2.5, Java 1.7 facet and JavaEE 6 Web Profile/JRE7 on https://account.hanatrial.ondemand.com/cockpit 
-Deployment descriptor must be:
+1. Use Java Web runtime library, Dynamic Web Module v.2.5, Java 1.7 facet and JavaEE 6 Web Profile/JRE7 on https://account.hanatrial.ondemand.com/cockpit 
+2. Deployment descriptor must be:
 
-<?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    id="WebApp_ID" version="2.5">
+	<?xml version="1.0" encoding="UTF-8"?>
+	<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
+		xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+		id="WebApp_ID" version="2.5">
 
-  <servlet>
-    <servlet-name>DataAccessServlet</servlet-name>
-    <servlet-class>com.mk.edu.DataAccessServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>DataAccessServlet</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>
-</web-app>
+	  <servlet>
+		<servlet-name>DataAccessServlet</servlet-name>
+		<servlet-class>com.mk.edu.DataAccessServlet</servlet-class>
+	  </servlet>
+	  <servlet-mapping>
+		<servlet-name>DataAccessServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	  </servlet-mapping>
+	</web-app>
 
-
+3. Remember to start the database and set the appropriate log lever for your logger.
+4. Apparently, the SAP HANA Catalog has NOTHING TO DO with the internal database created through servlet. CRUD works perfectly through code. Must find a way to view the landscape through a management interface.
