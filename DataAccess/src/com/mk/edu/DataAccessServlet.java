@@ -54,7 +54,9 @@ public class DataAccessServlet extends HttpServlet {
 		
 		this._Logger.info("Database to connect to: " + this._DatabaseName);
 		
-		this._TestCRUD_Init();
+		this._TestFileAccess_Init();
+		
+		//this._TestCRUD_Init();
 		
 		/*try {
             InitialContext ctx = new InitialContext();
@@ -83,7 +85,7 @@ public class DataAccessServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		this._TestCRUD(response);
+		//this._TestCRUD(response);
 		
 		/*ArrayList<Transaction> _V = null;
 				
@@ -106,7 +108,7 @@ public class DataAccessServlet extends HttpServlet {
 	}
 	
 	private String getCreateTransactionsDB_Script() throws IOException {
-		String _ScriptFile = "_Create_TransactionsDB.sql";
+		String _ScriptFile = "/WEB-INF/scripts/_Create_TransactionsDB.sql";
 		InputStream _Create_TransactionsDB = this.getServletContext().getResourceAsStream(_ScriptFile);
 		
 		//Thread.currentThread().getContextClassLoader().getResourceAsStream(name)
@@ -248,6 +250,16 @@ public class DataAccessServlet extends HttpServlet {
 				} 
 				catch (SQLException sqex) { throw new ServletException(sqex); }
 			}
+		}
+	}
+	
+	private void _TestFileAccess_Init() {
+		try {
+			String _S = this.getCreateTransactionsDB_Script();
+			this._Logger.info("Successfully read contents: " + _S);
+		} 
+		catch (IOException e) {
+			this._Logger.info("Error reading contents: " + e.getMessage());
 		}
 	}
 	
