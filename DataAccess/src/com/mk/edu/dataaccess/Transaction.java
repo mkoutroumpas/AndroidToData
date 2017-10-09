@@ -1,6 +1,10 @@
 package com.mk.edu.dataaccess;
 
-public class Transaction implements ITransaction {
+/**
+ * Transaction data entity 
+ */
+public class Transaction implements IDataEntity {
+	
 	private long _ID;
 	public long getID() {
 		return _ID;

@@ -1,6 +1,9 @@
 package com.mk.edu.dataaccess;
 
-public interface ITransaction {
+/***
+ * Common interface for data entities.
+ */
+public interface IDataEntity {
 	public long getID();
 	public void setID(long id);
 }

@@ -1,76 +1,35 @@
 
 package com.mk.edu.dataaccess;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TransactionDAO implements ITransactionDAO {
-	private final Logger _Logger = LoggerFactory.getLogger(this.getClass());
-	
-	private final DataSource _DataSource;
-	private final String _TableName = Transaction.class.getSimpleName();
-	
-	private String _SchemaName = "";
-	
-	public TransactionDAO(DataSource dataSource, String schemaname) throws SQLException {
-		this._DataSource = dataSource;
-		this._SchemaName = schemaname;
+public class TransactionDAO extends EntityExchange {
+	public TransactionDAO(String schemaName, String tableName, DataSource dataSource) {
+		super(schemaName, Transaction.class.getSimpleName(), dataSource);
+		this._Logger = LoggerFactory.getLogger(this.getClass());
 	}
 	
-	public TransactionDAO(DataSource dataSource) throws SQLException {
-		this(dataSource, "");
-	}
-	
-	/***
-	 * Fetch Transaction rows from this table.
-	 * @param where A valid WHERE SQL statement.
-	 * @return List of Transaction entities.
-	 * @throws Exception
+	/**
+	 * Map ResultSet contents to Transaction entities.
 	 */
-	public ArrayList<ITransaction> getTransactions(String where) throws Exception {
-		Connection _Connection = null;
-		ArrayList<ITransaction> list = null;
+	@Override
+	protected ArrayList<? extends IDataEntity> mapEntities(ResultSet rs) throws SQLException {
+		ArrayList<Transaction> _ret = new ArrayList<Transaction>();
 		
-        try {
-        	_Connection = this._DataSource.getConnection();
-            PreparedStatement pstmt = _Connection.prepareStatement("SELECT * FROM " + 
-            		(this._SchemaName != null && !this._SchemaName.trim().equals("") ? this._SchemaName + "." : "") + this._TableName + (where == null ? "" : " " + where));
-            ResultSet rs = pstmt.executeQuery();
-            list = new ArrayList<ITransaction>();
-            while (rs.next()) {
-            	Transaction t = new Transaction();
-                t.setID(rs.getLong(1));
-                t.setTransactionValue(rs.getDouble(2));
-                t.setTransactionCode(rs.getString(3));
-                list.add(t);
-            }
-            
-            this._Logger.info("Successfully fetched " + list.size() + " entities");
-        } 
-        catch (Exception ex) { 
-        	this._Logger.error(ex.getMessage());
-        	throw ex;
-        }
-        finally {
-            if (_Connection != null) {
-				try {
-					_Connection.close();
-				} 
-				catch (SQLException e) {
-					e.printStackTrace();
-					throw e;
-				}
-            }
-        }
-        
-        return list;
+		while (rs.next()) {
+	    	Transaction _T = new Transaction();
+	        _T.setID(rs.getLong(1));
+	        _T.setTransactionValue(rs.getDouble(2));
+	        _T.setTransactionCode(rs.getString(3));
+	        _ret.add(_T);
+	    }
+		
+		return _ret;
 	}
 }

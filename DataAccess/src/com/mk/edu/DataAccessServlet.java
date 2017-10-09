@@ -21,12 +21,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.mk.edu.dataaccess.Adapter;
-import com.mk.edu.dataaccess.ITransaction;
 import com.mk.edu.dataaccess.Transaction;
 import com.mk.edu.dataaccess.TransactionDAO;
 
 /**
- * Servlet implementation class DataAccessServlet
+ * Access databases (including SAP HANA MDC) through JDBC and return the results.
  */
 public class DataAccessServlet extends HttpServlet {
 	private final String _JSON_MIMEType = "application/json";
@@ -47,6 +46,9 @@ public class DataAccessServlet extends HttpServlet {
         super();
     }
 
+    /***
+     * Initialize the Servlet and prepare it to access the configured DataSource
+     */
 	@Override
 	public void init() throws ServletException {
 		this._SchemaName = this.getInitParameter("SchemaName");
@@ -83,41 +85,42 @@ public class DataAccessServlet extends HttpServlet {
 	}
 
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 * TODO: expand it to accept filtering and paging parameters
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		this.showTransactions(response);
+		this.writeTransactions(response);
 	}
 
 	/***
-	 * Display all Transactions entered.
+	 * Write all Transactions to Response with the configured MIME type.
 	 * @param response HttpServletResponse object to write to.
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	private void showTransactions(HttpServletResponse response) throws ServletException, IOException {
-		ArrayList<ITransaction> _V = null;
+	@SuppressWarnings("unchecked")
+	private void writeTransactions(HttpServletResponse response) throws ServletException, IOException {
+		ArrayList<Transaction> _Transactions = null;
 		
 		try {
-			_V = new TransactionDAO(this._DataSource).getTransactions(null);
+			_Transactions = (ArrayList<Transaction>) new TransactionDAO("", "Transaction", this._DataSource).getEntities(null);
 		}
 		catch (Exception e) {
 			this._Logger.error(e.getMessage());
 			throw new ServletException(e);
 		}
 		
-		if (_V != null && _V.size() > 0) {
+		if (_Transactions != null && _Transactions.size() > 0) {
 			response.setContentType(this._JSON_MIMEType);
-			response.getWriter().println(new Gson().toJson(_V));
+			response.getWriter().println(new Gson().toJson(_Transactions));
 			return;
 		}
 		
-		this._Logger.info("No entities fetched");
-		response.getWriter().println("No entities fetched");
+		this._Logger.info("No Transactions fetched");
+		response.getWriter().println("No Transactions fetched");
 	}
 	
 	/**
-	 * Parse script file to individual SQL script statements.
+	 * Simple parser of script file to individual SQL script statements.
 	 * @param scriptcontent Whole content of script file
 	 * @param delimiter Statement delimiter
 	 * @return List of SQL statements
@@ -137,7 +140,7 @@ public class DataAccessServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Load SQL script file
+	 * Load SQL script file bundled in this JAR
 	 * @param scriptfilename Name of script file
 	 * @return Script file contents
 	 * @throws IOException
@@ -163,7 +166,7 @@ public class DataAccessServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Execute a bunch of SQL statements 
+	 * Execute a series of SQL statements 
 	 * @param statements List of SQL statements to execute
 	 * @throws ServletException
 	 */
@@ -199,7 +202,7 @@ public class DataAccessServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Test method
+	 * Test method: standard CRUD operations primarily with SAP HANA MDC
 	 * @param response
 	 * @throws ServletException
 	 * @throws IOException
@@ -248,7 +251,7 @@ public class DataAccessServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Test method
+	 * Test method: standard CRUD operations primarily with SAP HANA MDC (initialization)
 	 * @throws ServletException
 	 */
 	@SuppressWarnings("unused")
@@ -291,7 +294,7 @@ public class DataAccessServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Test method
+	 * Test method: loading resources from this JAR
 	 */
 	@SuppressWarnings("unused")
 	private void _TestFileAccess_Init() {
