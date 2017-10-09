@@ -20,6 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.mk.edu.dataaccess.Adapter;
+import com.mk.edu.dataaccess.ITransaction;
+import com.mk.edu.dataaccess.Transaction;
+import com.mk.edu.dataaccess.TransactionDAO;
 
 /**
  * Servlet implementation class DataAccessServlet
@@ -30,6 +34,7 @@ public class DataAccessServlet extends HttpServlet {
 	
 	private String _DatabaseName = "";
 	private String _SchemaName = "";
+	private String _DataAccessScheme = "";
 	private String _DatabaseScriptFileName = "";
 	private DataSource _DataSource = null;
 	
@@ -46,6 +51,7 @@ public class DataAccessServlet extends HttpServlet {
 	public void init() throws ServletException {
 		this._SchemaName = this.getInitParameter("SchemaName");
 		this._DatabaseName = this.getInitParameter("DatabaseName");
+		this._DataAccessScheme = this.getInitParameter("DataAccessScheme");
 		this._DatabaseScriptFileName = this.getInitParameter("DatabaseScriptFileName");
 		
 		this._Logger.info("Database to connect to: " + this._DatabaseName);
@@ -167,7 +173,7 @@ public class DataAccessServlet extends HttpServlet {
 		if (statements != null && statements.size() > 0) {
 			try {
 				InitialContext ctx = new InitialContext();
-				this._DataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/" + this._DatabaseName);
+				this._DataSource = new Adapter().getDataSource(ctx, this._DataAccessScheme, this._DatabaseName);
 				connection = this._DataSource.getConnection();
 				
 				for (String st : statements) {
@@ -250,7 +256,7 @@ public class DataAccessServlet extends HttpServlet {
 		Connection connection = null;
 		try {
 			InitialContext ctx = new InitialContext();
-			this._DataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/" + this._DatabaseName);
+			this._DataSource = new Adapter().getDataSource(ctx, this._DataAccessScheme, this._DatabaseName);
 			connection = this._DataSource.getConnection();
 			try {
 				connection.prepareStatement("DROP TABLE Transaction").execute();

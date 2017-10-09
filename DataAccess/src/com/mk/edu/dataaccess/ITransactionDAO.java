@@ -1,4 +1,4 @@
-package com.mk.edu;
+package com.mk.edu.dataaccess;
 
 import java.util.ArrayList;
 

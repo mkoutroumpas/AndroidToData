@@ -1,5 +1,5 @@
 
-package com.mk.edu;
+package com.mk.edu.dataaccess;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

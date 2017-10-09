@@ -11,6 +11,10 @@
     		<param-value>testdb</param-value>
   		</init-param>
   		<init-param>
+    		<param-name>DataAccessScheme</param-name>
+    		<param-value>java:comp/env/jdbc/</param-value>
+  		</init-param>
+  		<init-param>
     		<param-name>SchemaName</param-name>
     		<param-value></param-value>
   		</init-param>
