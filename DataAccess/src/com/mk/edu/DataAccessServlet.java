@@ -90,7 +90,7 @@ public class DataAccessServlet extends HttpServlet {
 	 * @throws IOException
 	 */
 	private void showTransactions(HttpServletResponse response) throws ServletException, IOException {
-		ArrayList<Transaction> _V = null;
+		ArrayList<ITransaction> _V = null;
 		
 		try {
 			_V = new TransactionDAO(this._DataSource).getTransactions(null);

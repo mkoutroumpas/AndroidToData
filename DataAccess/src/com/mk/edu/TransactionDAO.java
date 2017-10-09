@@ -1,3 +1,4 @@
+
 package com.mk.edu;
 
 import java.sql.Connection;
@@ -11,7 +12,7 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TransactionDAO {
+public class TransactionDAO implements ITransactionDAO {
 	private final Logger _Logger = LoggerFactory.getLogger(this.getClass());
 	
 	private final DataSource _DataSource;
@@ -34,16 +35,16 @@ public class TransactionDAO {
 	 * @return List of Transaction entities.
 	 * @throws Exception
 	 */
-	public ArrayList<Transaction> getTransactions(String where) throws Exception {
+	public ArrayList<ITransaction> getTransactions(String where) throws Exception {
 		Connection _Connection = null;
-		ArrayList<Transaction> list = null;
+		ArrayList<ITransaction> list = null;
 		
         try {
         	_Connection = this._DataSource.getConnection();
             PreparedStatement pstmt = _Connection.prepareStatement("SELECT * FROM " + 
             		(this._SchemaName != null && !this._SchemaName.trim().equals("") ? this._SchemaName + "." : "") + this._TableName + (where == null ? "" : " " + where));
             ResultSet rs = pstmt.executeQuery();
-            list = new ArrayList<Transaction>();
+            list = new ArrayList<ITransaction>();
             while (rs.next()) {
             	Transaction t = new Transaction();
                 t.setID(rs.getLong(1));
@@ -54,7 +55,10 @@ public class TransactionDAO {
             
             this._Logger.info("Successfully fetched " + list.size() + " entities");
         } 
-        catch (Exception ex) { this._Logger.error(ex.getMessage()); }
+        catch (Exception ex) { 
+        	this._Logger.error(ex.getMessage());
+        	throw ex;
+        }
         finally {
             if (_Connection != null) {
 				try {

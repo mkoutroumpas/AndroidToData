@@ -1,6 +1,6 @@
 package com.mk.edu;
 
-public class Transaction {
+public class Transaction implements ITransaction {
 	private long _ID;
 	public long getID() {
 		return _ID;
