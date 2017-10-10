@@ -12,16 +12,16 @@ creation.
 
 3. Create your Servlet application, export it as a WAR file and upload it to management . Useful tips:
 
-  a. Servlet deployment descriptor header should look like this:
+    a. Servlet deployment descriptor header should look like this:
   
     <?xml version="1.0" encoding="UTF-8"?>
     <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
       xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
       id="WebApp_ID" version="2.5">
     
-  b. When uploading, select Java Web runtime library, Dynamic Web Module v.2.5, Java 1.7 facet and JavaEE 6 Web Profile/JRE7 on the
+    b. When uploading, select Java Web runtime library, Dynamic Web Module v.2.5, Java 1.7 facet and JavaEE 6 Web Profile/JRE7 on the
   Java Application parameterization.
     
-  c. Remember to start your HANA MDC database instance and set the appropriate Logger level of your Servlet app in management cockpit.
+    c. Remember to start your HANA MDC database instance and set the appropriate Logger level of your Servlet app in management cockpit.
   
 4. Access your newly deployed application through its URL (e.g. https://dataaccessp1942162386trial.hanatrial.ondemand.com/DataAccess ) from any client application, such as a browser or an Android app!
