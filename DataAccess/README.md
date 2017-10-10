@@ -5,7 +5,7 @@ Procedure of creating a SAP HANA MDC instance on SAP Neo (R) Cloud environment a
 
 1. Go to account.hanatrial.ondemand.com and register for a new trial account. 
 
-2. In the Neo (R) management cockpit (account.hanatrial.ondemand.com/cockpit ), go to the Databases section and configure a new HANA MDC instance. 
+2. In the Neo (R) management cockpit (https://account.hanatrial.ondemand.com/cockpit ), go to the Databases section and configure a new HANA MDC instance. 
 Enable Web Access to the newly created database instance. Please note that HANA MDC trial instances have an uptime of 24 hours; you will
 have to start up your instance manually after this timespan has elapsed. They are also automatically deleted 1 month after their
 creation. 
