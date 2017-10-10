@@ -7,6 +7,8 @@ DataAccess is a generalized connector to cloud databases; however, we focus on S
 
 UserInterfaceApp is a simple Android application that will interface to DataAccess and demonstrates several business intelligence-oriented functionalities such as dashboard creation, viewing and customization. It will also feature seamless offline functionality.
 
-Currently, the back-end module (DataAccess) is being developed, with a 01.11.2017 target completion date for the first beta version.
+Currently, the back-end module (DataAccess) is being developed, with a 01.11.2017 target completion date for the first beta version. 
+
+Design of the UserInterfaceApp on Android Studio will is scheduled to begin by the end of 10.2017.
 
 
