@@ -14,14 +14,14 @@ import org.slf4j.LoggerFactory;
 public abstract class EntityExchange implements IEntityExchange {
 	protected final DataSource _DataSource;
 	
-	protected Logger _Logger = LoggerFactory.getLogger(this.getClass());
-	protected String _SchemaName = "";
-	protected String _TableName = "";
+	protected Logger mLogger = LoggerFactory.getLogger(this.getClass());
+	protected String mSchemaName = "";
+	protected String mTableName = "";
 	
 	public EntityExchange(String schemaName, String tableName, DataSource dataSource) {
-		this._SchemaName = schemaName;
-		this._TableName = tableName;
-		this._DataSource = dataSource;
+		this.mSchemaName = schemaName;
+		this.mTableName = tableName;
+		this.mDataSource = dataSource;
 	}
 	
 	/**
@@ -35,32 +35,32 @@ public abstract class EntityExchange implements IEntityExchange {
 		Connection _Connection = null;
 		ArrayList<? extends IDataEntity> _ret = null;
 		
-        try {
-        	_Connection = this._DataSource.getConnection();
-            PreparedStatement pstmt = _Connection.prepareStatement("SELECT * FROM " + 
-            		(this._SchemaName != null && !this._SchemaName.trim().equals("") ? this._SchemaName + "." : "") + this._TableName + (where == null ? "" : " " + where));
-            ResultSet rs = pstmt.executeQuery();
-            _ret = this.mapEntities(rs);
-            
-            this._Logger.info("Successfully fetched " + _ret.size() + " entities");
-        } 
-        catch (Exception ex) { 
-        	this._Logger.error(ex.getMessage());
-        	throw ex;
-        }
-        finally {
-            if (_Connection != null) {
-				try {
-					_Connection.close();
-				} 
-				catch (SQLException e) {
-					e.printStackTrace();
-					throw e;
-				}
-            }
-        }
+		try {
+			_Connection = this._DataSource.getConnection();
+			PreparedStatement pstmt = _Connection.prepareStatement("SELECT * FROM " + 
+				(this._SchemaName != null && !this._SchemaName.trim().equals("") ? this._SchemaName + "." : "") + this._TableName + (where == null ? "" : " " + where));
+			ResultSet rs = pstmt.executeQuery();
+			_ret = this.mapEntities(rs);
+
+			this.mLogger.info("Successfully fetched " + _ret.size() + " entities");
+		} 
+		catch (Exception ex) { 
+			this.mLogger.error(ex.getMessage());
+			throw ex;
+		}
+		finally {
+		    if (_Connection != null) {
+			try {
+				_Connection.close();
+			} 
+			catch (SQLException e) {
+				e.printStackTrace();
+				throw e;
+			}
+		    }
+		}
         
-        return _ret;
+        	return _ret;
 	}
 	
 	/**
