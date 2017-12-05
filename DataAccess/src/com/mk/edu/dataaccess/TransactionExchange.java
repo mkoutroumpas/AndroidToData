@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class TransactionDAO extends EntityExchange {
 	public TransactionDAO(String schemaName, String tableName, DataSource dataSource) {
 		super(schemaName, Transaction.class.getSimpleName(), dataSource);
-		this._Logger = LoggerFactory.getLogger(this.getClass());
+		this.mLogger = LoggerFactory.getLogger(this.getClass());
 	}
 	
 	/**
@@ -23,12 +23,12 @@ public class TransactionDAO extends EntityExchange {
 		ArrayList<Transaction> _ret = new ArrayList<Transaction>();
 		
 		while (rs.next()) {
-	    	Transaction _T = new Transaction();
-	        _T.setID(rs.getLong(1));
-	        _T.setTransactionValue(rs.getDouble(2));
-	        _T.setTransactionCode(rs.getString(3));
-	        _ret.add(_T);
-	    }
+			Transaction _T = new Transaction();
+			_T.setID(rs.getLong(1));
+			_T.setTransactionValue(rs.getDouble(2));
+			_T.setTransactionCode(rs.getString(3));
+			_ret.add(_T);
+		}
 		
 		return _ret;
 	}
