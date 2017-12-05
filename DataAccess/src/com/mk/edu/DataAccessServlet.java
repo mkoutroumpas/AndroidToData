@@ -28,14 +28,14 @@ import com.mk.edu.dataaccess.TransactionDAO;
  * Access databases (including SAP HANA MDC) through JDBC and return the results.
  */
 public class DataAccessServlet extends HttpServlet {
-	private final String _JSON_MIMEType = "application/json";
-	private final Logger _Logger = LoggerFactory.getLogger(this.getClass());
+	private final String mJSONMimeType = "application/json";
+	private final Logger mLogger = LoggerFactory.getLogger(this.getClass());
 	
-	private String _DatabaseName = "";
-	private String _SchemaName = "";
-	private String _DataAccessScheme = "";
-	private String _DatabaseScriptFileName = "";
-	private DataSource _DataSource = null;
+	private String mDatabaseName = "";
+	private String mSchemaName = "";
+	private String mDataAccessScheme = "";
+	private String mDatabaseScriptFileName = "";
+	private DataSource mDataSource = null;
 	
 	private static final long serialVersionUID = 1L;
        
@@ -51,37 +51,42 @@ public class DataAccessServlet extends HttpServlet {
      */
 	@Override
 	public void init() throws ServletException {
-		this._SchemaName = this.getInitParameter("SchemaName");
-		this._DatabaseName = this.getInitParameter("DatabaseName");
-		this._DataAccessScheme = this.getInitParameter("DataAccessScheme");
-		this._DatabaseScriptFileName = this.getInitParameter("DatabaseScriptFileName");
+		this.mSchemaName = this.getInitParameter("SchemaName");
+		this.mDatabaseName = this.getInitParameter("DatabaseName");
+		this.mDataAccessScheme = this.getInitParameter("DataAccessScheme");
+		this.mDatabaseScriptFileName = this.getInitParameter("DatabaseScriptFileName");
 		
-		this._Logger.info("Database to connect to: " + this._DatabaseName);
-		this._Logger.info("Selected Database schema: " + this._SchemaName);
-		this._Logger.info("Database script file: " + this._DatabaseScriptFileName);
+		this.mLogger.info("Database to connect to: " + this.mDatabaseName);
+		this.mLogger.info("Selected Database schema: " + this.mSchemaName);
+		this.mLogger.info("Database script file: " + this.mDatabaseScriptFileName);
 		
 		String script = null;
 		try {
-			script = this.loadDatabaseScript(this._DatabaseScriptFileName);
-			this._Logger.info("Successfully loaded script file: " + this._DatabaseScriptFileName);
-		} catch (Exception e) { this._Logger.error(e.getMessage()); }
+			script = this.loadDatabaseScript(this.mDatabaseScriptFileName);
+			this.mLogger.info("Successfully loaded script file: " + this.mDatabaseScriptFileName);
+		} catch (Exception e) { 
+			this.mLogger.error(e.getMessage()); 
+		}
 		
 		ArrayList<String> statements = null;
 		try {
 			if (script != null && !script.trim().equals("")) {
 				statements = this.getScriptStatements(script, ";");
-				this._Logger.info("Successfully loaded script file statements.");
+				this.mLogger.info("Successfully loaded script file statements.");
 			}
 			else
-				this._Logger.info("Script file statements not loaded.");
-		} catch (Exception e) { this._Logger.error(e.getMessage()); }
+				this.mLogger.info("Script file statements not loaded.");
+		} 
+		catch (Exception e) { 
+			this.mLogger.error(e.getMessage()); 
+		}
 		
 		if (statements != null && statements.size() > 0) {
 			this.executeStatements(statements);
-			this._Logger.info(statements.size() + " statements executed successfully.");
+			this.mLogger.info(statements.size() + " statements executed successfully.");
 		}
 		else
-			this._Logger.info("No SQL statements found to execute.");
+			this.mLogger.info("No SQL statements found to execute.");
 	}
 
 	/**
@@ -102,20 +107,20 @@ public class DataAccessServlet extends HttpServlet {
 		ArrayList<Transaction> _Transactions = null;
 		
 		try {
-			_Transactions = (ArrayList<Transaction>) new TransactionDAO("", "Transaction", this._DataSource).getEntities(null);
+			_Transactions = (ArrayList<Transaction>) new TransactionDAO("", "Transaction", this.mDataSource).getEntities(null);
 		}
 		catch (Exception e) {
-			this._Logger.error(e.getMessage());
+			this.mLogger.error(e.getMessage());
 			throw new ServletException(e);
 		}
 		
 		if (_Transactions != null && _Transactions.size() > 0) {
-			response.setContentType(this._JSON_MIMEType);
+			response.setContentType(this.mJSONMimeType);
 			response.getWriter().println(new Gson().toJson(_Transactions));
 			return;
 		}
 		
-		this._Logger.info("No Transactions fetched");
+		this.mLogger.info("No Transactions fetched");
 		response.getWriter().println("No Transactions fetched");
 	}
 	
@@ -151,17 +156,17 @@ public class DataAccessServlet extends HttpServlet {
 			InputStream _CreateDBStream = this.getServletContext().getResourceAsStream(scriptfilename);
 			
 			if (_CreateDBStream != null) {
-				this._Logger.info("Successfully loaded file " + scriptfilename);
+				this.mLogger.info("Successfully loaded file " + scriptfilename);
 				
 				Scanner _Scanner = new Scanner(_CreateDBStream).useDelimiter("\\A");
 				String _ret = _Scanner.hasNext() ? _Scanner.next() : "";
-		        _Scanner.close();
-		        
-		        this._Logger.info("Successfully read contents of file " + scriptfilename);
-		        return _ret;
+				_Scanner.close();
+
+				this.mLogger.info("Successfully read contents of file " + scriptfilename);
+				return _ret;
 			}
 		}
-		this._Logger.error("Error loading file " + scriptfilename);
+		this.mLogger.error("Error loading file " + scriptfilename);
 		return null;
 	}
 	
@@ -176,18 +181,20 @@ public class DataAccessServlet extends HttpServlet {
 		if (statements != null && statements.size() > 0) {
 			try {
 				InitialContext ctx = new InitialContext();
-				this._DataSource = new Adapter().getDataSource(ctx, this._DataAccessScheme, this._DatabaseName);
-				connection = this._DataSource.getConnection();
+				this.mDataSource = new Adapter().getDataSource(ctx, this.mDataAccessScheme, this.mDatabaseName);
+				connection = this.mDataSource.getConnection();
 				
 				for (String st : statements) {
 					try {
 						connection.prepareStatement(st).execute();
-						this._Logger.info("Successfully executed statement: " + st);
-					} catch (Exception e) { this._Logger.error("Error executing statement: " + st + ". Error description: " + e.getMessage()); }
+						this.mLogger.info("Successfully executed statement: " + st);
+					} catch (Exception e) { 
+						this.mLogger.error("Error executing statement: " + st + ". Error description: " + e.getMessage()); 
+					}
 				}
 			}
 			catch (Exception e) {
-				this._Logger.error(e.getMessage());
+				this.mLogger.error(e.getMessage());
 				throw new ServletException(e);
 			}
 			finally {
@@ -195,7 +202,9 @@ public class DataAccessServlet extends HttpServlet {
 					try {
 						connection.close();
 					} 
-					catch (SQLException sqex) { throw new ServletException(sqex); }
+					catch (SQLException sqex) { 
+						throw new ServletException(sqex); 
+					}
 				}
 			}
 		}
@@ -208,45 +217,46 @@ public class DataAccessServlet extends HttpServlet {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unused")
+	@Test
 	private void _TestCRUD(HttpServletResponse response) throws ServletException, IOException {
 		ArrayList<Transaction> list = new ArrayList<Transaction>();
 		Connection connection = null;
 		try {
-			connection = this._DataSource.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Transaction");
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-            	Transaction t = new Transaction();
-                t.setID(rs.getLong(1));
-                t.setTransactionValue(rs.getDouble(2));
-                t.setTransactionCode(rs.getString(3));
-                list.add(t);
-            }
+			connection = this.mDataSource.getConnection();
+		    	PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Transaction");
+		    	ResultSet rs = pstmt.executeQuery();
+		    	while (rs.next()) {
+				Transaction t = new Transaction();
+				t.setID(rs.getLong(1));
+				t.setTransactionValue(rs.getDouble(2));
+				t.setTransactionCode(rs.getString(3));
+				list.add(t);
+		    	}
             
-            this._Logger.info("Successfully fetched " + list.size() + " entities");
-        } 
+            	this.mLogger.info("Successfully fetched " + list.size() + " entities");
+        	} 
 		catch (Exception ex) {
-			this._Logger.error(ex.getMessage());
+			this.mLogger.error(ex.getMessage());
 			throw new ServletException(ex);
 		}
-        finally {
-            if (connection != null) {
+		finally {
+			if (connection != null) {
 				try {
 					connection.close();
 				} catch (SQLException e) {
-					this._Logger.error(e.getMessage());
+					this.mLogger.error(e.getMessage());
 					throw new ServletException(e);
 				}
-            }
-        }
-		
+			}
+		}
+
 		if (list.size() > 0) {
-			response.setContentType(this._JSON_MIMEType);
+			response.setContentType(this.mJSONMimeType);
 			response.getWriter().println(new Gson().toJson(list));
 			return;
 		}
-		
-		this._Logger.info("No entities fetched");
+
+		this.mLogger.info("No entities fetched");
 		response.getWriter().println("No entities fetched");
 	}
 	
@@ -255,34 +265,39 @@ public class DataAccessServlet extends HttpServlet {
 	 * @throws ServletException
 	 */
 	@SuppressWarnings("unused")
+	@Test
 	private void _TestCRUD_Init() throws ServletException {
 		Connection connection = null;
 		try {
 			InitialContext ctx = new InitialContext();
-			this._DataSource = new Adapter().getDataSource(ctx, this._DataAccessScheme, this._DatabaseName);
-			connection = this._DataSource.getConnection();
+			this.mDataSource = new Adapter().getDataSource(ctx, this.mDataAccessScheme, this.mDatabaseName);
+			connection = this.mDataSource.getConnection();
 			try {
 				connection.prepareStatement("DROP TABLE Transaction").execute();
-				this._Logger.info("Table Transaction deleted successfully");
-			} catch (Exception e) { this._Logger.error("Error deleting Transaction table: " + e.getMessage()); }
+				this.mLogger.info("Table Transaction deleted successfully");
+			} catch (Exception e) { this.mLogger.error("Error deleting Transaction table: " + e.getMessage()); }
 			try {
 				connection.prepareStatement("CREATE COLUMN TABLE Transaction " +
 					"(ID INTEGER, " +
 					"TransactionValue DECIMAL, " +
 					"TransactionCode VARCHAR(255), " +
 					"PRIMARY KEY (ID))").execute();
-				this._Logger.info("Table Transaction created successfully");
-			} catch (Exception e) { this._Logger.error("Error creating Transaction table: " + e.getMessage()); }
+				this.mLogger.info("Table Transaction created successfully");
+			} catch (Exception e) { 
+				this.mLogger.error("Error creating Transaction table: " + e.getMessage()); 
+			}
 			try {
 				connection.prepareStatement("INSERT INTO Transaction VALUES (1, 0.45, SYSUUID)").execute();
-				this._Logger.info("Row inserted successfully into table Transaction");
-			} catch (Exception e) { this._Logger.error("Error inserting row in Transaction table: " + e.getMessage()); }
+				this.mLogger.info("Row inserted successfully into table Transaction");
+			} catch (Exception e) { 
+				this.mLogger.error("Error inserting row in Transaction table: " + e.getMessage()); 
+			}
 			
 		}
 		catch (Exception e) {
-			this._Logger.error(e.getMessage());
-            throw new ServletException(e);
-        }
+			this.mLogger.error(e.getMessage());
+            		throw new ServletException(e);
+        	}
 		finally {
 			if (connection != null){
 				try {
@@ -297,14 +312,14 @@ public class DataAccessServlet extends HttpServlet {
 	 * Test method: loading resources from this JAR
 	 */
 	@SuppressWarnings("unused")
+	@Test
 	private void _TestFileAccess_Init() {
 		try {
-			String _S = this.loadDatabaseScript(this._DatabaseScriptFileName);
-			this._Logger.info("Successfully read contents: " + _S);
+			String _S = this.loadDatabaseScript(this.mDatabaseScriptFileName);
+			this.mLogger.info("Successfully read contents: " + _S);
 		} 
 		catch (IOException e) {
-			this._Logger.info("Error reading contents: " + e.getMessage());
+			this.mLogger.info("Error reading contents: " + e.getMessage());
 		}
 	}
-	
 }
