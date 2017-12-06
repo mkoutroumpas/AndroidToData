@@ -72,7 +72,6 @@ public class DataAccessServlet extends HttpServlet {
 		try {
 			if (script != null && !script.trim().equals("")) {
 				statements = this.getScriptStatements(script, ";");
-				this.mLogger.info("Successfully loaded script file statements.");
 			}
 			else
 				this.mLogger.info("Script file statements not loaded.");
@@ -156,13 +155,9 @@ public class DataAccessServlet extends HttpServlet {
 			InputStream _CreateDBStream = this.getServletContext().getResourceAsStream(scriptfilename);
 			
 			if (_CreateDBStream != null) {
-				this.mLogger.info("Successfully loaded file " + scriptfilename);
-				
 				Scanner _Scanner = new Scanner(_CreateDBStream).useDelimiter("\\A");
 				String _ret = _Scanner.hasNext() ? _Scanner.next() : "";
 				_Scanner.close();
-
-				this.mLogger.info("Successfully read contents of file " + scriptfilename);
 				return _ret;
 			}
 		}
@@ -187,7 +182,6 @@ public class DataAccessServlet extends HttpServlet {
 				for (String st : statements) {
 					try {
 						connection.prepareStatement(st).execute();
-						this.mLogger.info("Successfully executed statement: " + st);
 					} catch (Exception e) { 
 						this.mLogger.error("Error executing statement: " + st + ". Error description: " + e.getMessage()); 
 					}
@@ -232,8 +226,6 @@ public class DataAccessServlet extends HttpServlet {
 				t.setTransactionCode(rs.getString(3));
 				list.add(t);
 		    	}
-            
-            	this.mLogger.info("Successfully fetched " + list.size() + " entities");
         	} 
 		catch (Exception ex) {
 			this.mLogger.error(ex.getMessage());
@@ -274,21 +266,21 @@ public class DataAccessServlet extends HttpServlet {
 			connection = this.mDataSource.getConnection();
 			try {
 				connection.prepareStatement("DROP TABLE Transaction").execute();
-				this.mLogger.info("Table Transaction deleted successfully");
-			} catch (Exception e) { this.mLogger.error("Error deleting Transaction table: " + e.getMessage()); }
+			} 
+			catch (Exception e) { 
+				this.mLogger.error("Error deleting Transaction table: " + e.getMessage()); 
+			}
 			try {
 				connection.prepareStatement("CREATE COLUMN TABLE Transaction " +
 					"(ID INTEGER, " +
 					"TransactionValue DECIMAL, " +
 					"TransactionCode VARCHAR(255), " +
 					"PRIMARY KEY (ID))").execute();
-				this.mLogger.info("Table Transaction created successfully");
 			} catch (Exception e) { 
 				this.mLogger.error("Error creating Transaction table: " + e.getMessage()); 
 			}
 			try {
 				connection.prepareStatement("INSERT INTO Transaction VALUES (1, 0.45, SYSUUID)").execute();
-				this.mLogger.info("Row inserted successfully into table Transaction");
 			} catch (Exception e) { 
 				this.mLogger.error("Error inserting row in Transaction table: " + e.getMessage()); 
 			}
@@ -316,7 +308,6 @@ public class DataAccessServlet extends HttpServlet {
 	private void _TestFileAccess_Init() {
 		try {
 			String _S = this.loadDatabaseScript(this.mDatabaseScriptFileName);
-			this.mLogger.info("Successfully read contents: " + _S);
 		} 
 		catch (IOException e) {
 			this.mLogger.info("Error reading contents: " + e.getMessage());
